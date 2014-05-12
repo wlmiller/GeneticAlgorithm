@@ -5,22 +5,18 @@
  */
 package GeneticAlgorithm;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.awt.*;
 
 public class Cell extends JPanel {
-	Color color = new Color(160, 82, 45);
+	Color color = Color.black;
 	// evolverDirection = -1 represents "no evolver."
 	int evolverDirection = -1;
-	
+
 	public void paintComponent (Graphics g) {
 		g.setColor(color);
-		g.fillRect(0,0,getWidth(),getHeight());
-		
-		Graphics2D g2 = (Graphics2D)g;
+		g.fillRect(0,0,getWidth(),getHeight());;
+
 		if (evolverDirection >= 0) {
 			g.setColor(Color.black);
 			int[] xVals = new int[3];
@@ -79,12 +75,20 @@ public class Cell extends JPanel {
 	}
 	
 	public void update(int contents) {
-		if (contents == 0) {
-			this.color = new Color(160, 82, 45);
+		Color newColor = Color.black;
+
+        if (contents == -1) {
+			newColor = Color.black;
+		} else if (contents == 0) {
+			newColor = new Color(160, 82, 45);
 		} else if (contents == 1) {
-			this.color = Color.green;
+			newColor = Color.green;
 		}
-		repaint();
+
+        if (newColor != this.color) {
+            this.color = newColor;
+            repaint();
+        }
 	}
 	
 	public void addEvolver(int direction) {

@@ -11,15 +11,14 @@
  * or evolver).  These genomes are combined via crossover and mutated.
  */
 package GeneticAlgorithm;
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.util.ArrayList;
 
-import javax.swing.JFrame;
+import javax.swing.*;
 
 public class GeneticAlgorithm {
-	static final int NUM_ROWS = 60;
-	static final int NUM_COLS = 80;
+	static final int NUM_ROWS = 50;
+	static final int NUM_COLS = 50;
 	static final double PLANT_DENSITY = 0.1;
 	static final double PLANTS_PER_EVOLVER = 10;
 
@@ -30,21 +29,45 @@ public class GeneticAlgorithm {
 		
 		JFrame frame = new JFrame("Genetic Algorithm");
 		
-		frame.setLayout(new GridLayout(NUM_ROWS,NUM_COLS));
+		frame.setLayout(new GridBagLayout());
 		frame.setPreferredSize(new Dimension(800,600));
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+		JPanel worldGrid = new JPanel();
+		worldGrid.setLayout(new GridLayout(NUM_ROWS,NUM_COLS));
+		worldGrid.setBorder(BorderFactory.createLineBorder(Color.black, 5));
+		worldGrid.setSize(new Dimension(500,500));
 
 		World world = new World(NUM_ROWS,NUM_COLS);
-		world.growPlants(PLANT_COUNT,(int)(PLANT_COUNT/10));
+		world.growPlants(PLANT_COUNT,PLANT_COUNT/10);
 		world.placeEvolvers(EVOLVER_COUNT);
 		
 		Cell[][] cells = world.getCells();
 		for (int i = 0; i < cells.length; i++) {
 			for (int j = 0; j < cells[i].length; j++) {
-				frame.add(cells[i][j]);
+				worldGrid.add(cells[i][j]);
 			}
 		}
+
+		TextScroll scroll = new TextScroll();
+
+		GridBagConstraints c = new GridBagConstraints();
+
+		c.fill = GridBagConstraints.NONE;
+		c.weightx = 0.0;
+		c.gridx = 0;
+		c.gridy = 0;
+		frame.add(worldGrid,c);
+
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1.0;
+		c.gridx = 1;
+		c.gridy = 0;
+		frame.add(scroll,c);
+
 		frame.pack();
+        world.display();
+		frame.setVisible(true);
 		
 		world.noDisplay();
 		
@@ -53,10 +76,6 @@ public class GeneticAlgorithm {
 		// shown for each year.
 		for (int i = 0; i < 200; i++) {
 			for (int j = 0; j < 365; j++) {
-				if (i == 100) {
-					world.display();
-					frame.setVisible(true);
-				}
 				if (i >= 100) {
 					try {
 						Thread.sleep(25);
@@ -64,15 +83,14 @@ public class GeneticAlgorithm {
 				}
 				world.step();
 			}
-			System.out.print(i);
-			System.out.print(": ");
-			System.out.format("%.2f",world.averageScore());
-			System.out.print(" (max = ");
-			System.out.print(world.maxScore());
-			System.out.println(")");
+
+			scroll.addText(i + ": " + String.format("%.2f",world.averageScore()) + " (max = " + world.maxScore() + ")");
 			
 			ArrayList<int[]> newGenomes = world.evolve();
 			world.removeEvolvers();
+            if (i == 99) {
+                world.display();
+            }
 			world.refreshWorld();
 			try {
 				if (i < 100)

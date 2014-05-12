@@ -14,7 +14,9 @@ tmp/
 local.properties
 .classpath
 .settings/
+.idea/
 .loadpath
+*.iml
 
 # External tool builders
 .externalToolBuilders/

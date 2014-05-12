@@ -74,7 +74,9 @@ public class World {
 			for (int j = 0; j < cols; j++) {
 				this.map[i][j] = 0;
 				this.obstMap[i][j] = 0;
-				cells[i][j].update(0);
+				if (this.display) {
+					cells[i][j].update(0);
+				}
 			}
 		}
 		growPlants(this.numPlants, this.clumps);		
@@ -130,7 +132,9 @@ public class World {
 				if (y >= this.rows) y -= this.rows;
 			}
 			this.map[y][x] = 1;
-			cells[y][x].update(1);
+			if (this.display) {
+				cells[y][x].update(1);
+			}
 		}
 	}
 	
@@ -157,7 +161,7 @@ public class World {
 		
 		for (int i = 0; i < numEvolvers; i++) {
 			int direction = (int)(Math.random()*4);
-			int x = 0, y = 0;
+			int x, y;
 			do {
 				x = (int)(Math.random()*this.cols);
 				y = (int)(Math.random()*this.rows);
@@ -209,7 +213,7 @@ public class World {
 		// Get the action from the evolver.
 		int action = e.getAction(facingCell);
 		
-		int newDirection = 0;
+		int newDirection;
 		switch (action) {
 		case 0:
 			// Move forward if the cell isn't blocked.
@@ -315,16 +319,16 @@ public class World {
 		// Select a random option from a weighted distribution.
 		int sum = 0;
 		
-		for (int i = 0; i < evolvers.size(); i++) {
-			sum += evolvers.get(i).getScore();
+		for (Evolver e : evolvers) {
+			sum += e.getScore();
 		}
 		
 		int selection = (int)(Math.random()*sum);
 		
 		int runningSum = 0;
-		for (int i = 0; i < evolvers.size(); i++) {
-			runningSum += evolvers.get(i).getScore();
-			if (runningSum > selection) return evolvers.get(i);
+		for (Evolver e : evolvers) {
+			runningSum += e.getScore();
+			if (runningSum > selection) return e;
 		}
 		return evolvers.get(evolvers.size()-1);
 	}
