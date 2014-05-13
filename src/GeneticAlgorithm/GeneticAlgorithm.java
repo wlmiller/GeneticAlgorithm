@@ -13,14 +13,23 @@
 package GeneticAlgorithm;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class GeneticAlgorithm {
 	static final int NUM_ROWS = 50;
 	static final int NUM_COLS = 50;
 	static final double PLANT_DENSITY = 0.1;
 	static final double PLANTS_PER_EVOLVER = 10;
+	
+	static int timeStep = 100;
+	
+	public static void setTimeStep(int timer) {
+		timeStep = timer;
+	}
 
 	public static void main(String[] args) {
 		final int PLANT_COUNT = (int)(PLANT_DENSITY*NUM_ROWS*NUM_COLS);
@@ -50,6 +59,33 @@ public class GeneticAlgorithm {
 		}
 
 		TextScroll scroll = new TextScroll();
+		
+		JSlider slider = new JSlider(JSlider.HORIZONTAL,4,40,1000/timeStep);
+		slider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				JSlider source = (JSlider)e.getSource();
+				if (!source.getValueIsAdjusting()) {
+					setTimeStep(1000/source.getValue());
+				}
+            }
+		});
+
+		Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
+		labelTable.put(4, new JLabel("Slow"));
+		labelTable.put(22, new JLabel("Medium"));
+		labelTable.put(40, new JLabel("Fast"));
+		slider.setLabelTable(labelTable);
+		slider.setPaintLabels(true);
+		
+		Font labelFont = new Font("Sans", Font.BOLD, 14);
+		
+		JLabel speedLabel = new JLabel("Speed:");
+		speedLabel.setVerticalAlignment(JLabel.TOP);
+		speedLabel.setFont(labelFont);
+		
+		JLabel scoresLabel = new JLabel("Scores:");
+		scoresLabel.setFont(labelFont);
 
 		GridBagConstraints c = new GridBagConstraints();
 
@@ -57,12 +93,34 @@ public class GeneticAlgorithm {
 		c.weightx = 0.0;
 		c.gridx = 0;
 		c.gridy = 0;
+		c.gridheight = GridBagConstraints.REMAINDER;
 		frame.add(worldGrid,c);
+		c.gridheight = 1;
 
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1.0;
+		c.gridx = 2;
+		c.gridy = 0;
+		frame.add(slider,c);
+		
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1.0;
 		c.gridx = 1;
 		c.gridy = 0;
+		frame.add(speedLabel,c);
+		
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1.0;
+		c.gridx = 1;
+		c.gridy = 1;
+		c.gridwidth = 2;
+		frame.add(scoresLabel,c);
+		
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1.0;
+		c.gridx = 1;
+		c.gridy = 2;
+		c.gridwidth = 2;
 		frame.add(scroll,c);
 
 		frame.pack();
@@ -78,7 +136,7 @@ public class GeneticAlgorithm {
 			for (int j = 0; j < 365; j++) {
 				if (i >= 100) {
 					try {
-						Thread.sleep(25);
+						Thread.sleep(timeStep);
 					} catch (Exception e) {}
 				}
 				world.step();
