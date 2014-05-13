@@ -15,7 +15,7 @@ public class Cell extends JPanel {
 
 	public void paintComponent (Graphics g) {
 		g.setColor(color);
-		g.fillRect(0,0,getWidth(),getHeight());;
+		g.fillRect(0,0,getWidth(),getHeight());
 
 		if (evolverDirection >= 0) {
 			g.setColor(Color.black);
@@ -27,10 +27,10 @@ public class Cell extends JPanel {
 				yVals[0] = getHeight()/2;
 				
 				xVals[1] = 0;
-				yVals[1] = 0;
+				yVals[1] = getHeight()/8;
 				
 				xVals[2] = 0;
-				yVals[2] = getHeight();
+				yVals[2] = 7*getHeight()/8;
 				
 				break;
 				
@@ -38,10 +38,10 @@ public class Cell extends JPanel {
 				xVals[0] = getWidth()/2;
 				yVals[0] = 0;
 				
-				xVals[1] = 0;
+				xVals[1] = getWidth()/8;
 				yVals[1] = getHeight();
 				
-				xVals[2] = getWidth();
+				xVals[2] = 7*getWidth()/8;
 				yVals[2] = getHeight();
 				
 				break;
@@ -51,10 +51,10 @@ public class Cell extends JPanel {
 				yVals[0] = getHeight()/2;
 				
 				xVals[1] = getWidth();
-				yVals[1] = getHeight();
+				yVals[1] = 7*getHeight()/8;
 				
 				xVals[2] = getWidth();
-				yVals[2] = 0;
+				yVals[2] = getHeight()/8;
 				
 				break;
 				
@@ -62,10 +62,10 @@ public class Cell extends JPanel {
 				xVals[0] = getWidth()/2;
 				yVals[0] = getHeight();
 				
-				xVals[1] = getWidth();
+				xVals[1] = 7*getWidth()/8;
 				yVals[1] = 0;
 				
-				xVals[2] = 0;
+				xVals[2] = getWidth()/8;
 				yVals[2] = 0;
 				
 				break;
