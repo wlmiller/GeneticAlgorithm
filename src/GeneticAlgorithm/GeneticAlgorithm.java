@@ -12,6 +12,8 @@
  */
 package GeneticAlgorithm;
 import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -36,31 +38,31 @@ public class GeneticAlgorithm {
 		final int EVOLVER_COUNT = (int)(PLANT_COUNT/PLANTS_PER_EVOLVER);
 		System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
 		
-		JFrame frame = new JFrame("Genetic Algorithm");
+		final JFrame frame = new JFrame("Genetic Algorithm");
 		
 		frame.setLayout(new GridBagLayout());
 		frame.setPreferredSize(new Dimension(800,600));
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		JPanel worldGrid = new JPanel();
+		final JPanel worldGrid = new JPanel();
 		worldGrid.setLayout(new GridLayout(NUM_ROWS,NUM_COLS));
 		worldGrid.setBorder(BorderFactory.createLineBorder(Color.black, 5));
 		worldGrid.setSize(new Dimension(500,500));
 
-		World world = new World(NUM_ROWS,NUM_COLS);
+		final World world = new World(NUM_ROWS,NUM_COLS);
 		world.growPlants(PLANT_COUNT,PLANT_COUNT/10);
 		world.placeEvolvers(EVOLVER_COUNT);
 		
 		Cell[][] cells = world.getCells();
-		for (int i = 0; i < cells.length; i++) {
-			for (int j = 0; j < cells[i].length; j++) {
-				worldGrid.add(cells[i][j]);
-			}
-		}
+        for (Cell[] row : cells) {
+            for (Cell cell : row) {
+                worldGrid.add(cell);
+            }
+        }
 
-		TextScroll scroll = new TextScroll();
+		final TextScroll scroll = new TextScroll();
 		
-		JSlider slider = new JSlider(JSlider.HORIZONTAL,4,40,1000/timeStep);
+		final JSlider slider = new JSlider(JSlider.HORIZONTAL,4,40,1000/timeStep);
 		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -83,6 +85,16 @@ public class GeneticAlgorithm {
 		JLabel speedLabel = new JLabel("Speed:");
 		speedLabel.setVerticalAlignment(JLabel.TOP);
 		speedLabel.setFont(labelFont);
+
+        Checkbox yearEndOnly = new Checkbox("Show only year-end summaries", false);
+        yearEndOnly.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                Checkbox source = (Checkbox) e.getSource();
+                slider.setEnabled(!source.getState());
+                world.display(!source.getState());
+            }
+        });
 		
 		JLabel scoresLabel = new JLabel("Scores:");
 		scoresLabel.setFont(labelFont);
@@ -97,44 +109,51 @@ public class GeneticAlgorithm {
 		frame.add(worldGrid,c);
 		c.gridheight = 1;
 
+        c.fill = GridBagConstraints.BOTH;
+        c.weightx = 1.0;
+        c.gridx = 1;
+        c.gridy = 0;
+        frame.add(speedLabel,c);
+
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1.0;
 		c.gridx = 2;
 		c.gridy = 0;
 		frame.add(slider,c);
-		
-		c.fill = GridBagConstraints.BOTH;
-		c.weightx = 1.0;
-		c.gridx = 1;
-		c.gridy = 0;
-		frame.add(speedLabel,c);
-		
-		c.fill = GridBagConstraints.BOTH;
-		c.weightx = 1.0;
-		c.gridx = 1;
-		c.gridy = 1;
-		c.gridwidth = 2;
-		frame.add(scoresLabel,c);
+
+        c.fill = GridBagConstraints.BOTH;
+        c.weightx = 1.0;
+        c.gridx = 2;
+        c.gridy = 1;
+        frame.add(yearEndOnly,c);
 		
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1.0;
 		c.gridx = 1;
 		c.gridy = 2;
 		c.gridwidth = 2;
+		frame.add(scoresLabel,c);
+		
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1.0;
+		c.gridx = 1;
+		c.gridy = 3;
+		c.gridwidth = GridBagConstraints.REMAINDER;
 		frame.add(scroll,c);
 
 		frame.pack();
-        world.display();
 		frame.setVisible(true);
 		
-		world.noDisplay();
+		world.display(true);
 		
 		// Run the simulation for 200 "years".  The first 100 are not displayed,
 		// but the average and maximum score (number of plants per evolver) are
 		// shown for each year.
-		for (int i = 0; i < 200; i++) {
+        int i = 0;
+		while (true) {
+            i++;
 			for (int j = 0; j < 365; j++) {
-				if (i >= 100) {
+				if (!yearEndOnly.getState()) {
 					try {
 						Thread.sleep(timeStep);
 					} catch (Exception e) {}
@@ -146,15 +165,12 @@ public class GeneticAlgorithm {
 			
 			ArrayList<int[]> newGenomes = world.evolve();
 			world.removeEvolvers();
-            if (i == 99) {
-                world.display();
-            }
 			world.refreshWorld();
 			try {
-				if (i < 100)
+				if (yearEndOnly.getState())
 					Thread.sleep(100);
 				else
-					Thread.sleep(1000);
+					Thread.sleep(10*timeStep);
 			} catch (Exception e) {}
 			world.placeEvolvers(EVOLVER_COUNT, newGenomes);
 		}

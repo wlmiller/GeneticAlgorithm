@@ -9,8 +9,6 @@ package GeneticAlgorithm;
 import java.util.ArrayList;
 
 public class World {
-	private int[][] map;
-	private int[][] obstMap;
 	private int rows, cols;
 	private ArrayList<Evolver> evolvers = new ArrayList<Evolver>();
 	private ArrayList<int[]> directions = new ArrayList<int[]>();
@@ -18,7 +16,7 @@ public class World {
 	private double mutationRate = 0.01;
 	private int numPlants;
 	private int clumps;
-	private Boolean display = false;
+	//private Boolean display = false;
 	
 	class plantSource {
 		public int x;
@@ -42,23 +40,14 @@ public class World {
 		this.directions.add(new int[]{0,-1});
 		this.directions.add(new int[]{-1,0});
 		this.directions.add(new int[]{0,1});
-		
-		this.map = new int[rows][cols];
-		this.obstMap = new int[rows][cols];
+
 		this.cells = new Cell[rows][cols];
 		
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols; j++) {
-				this.map[i][j] = 0;
-				this.obstMap[i][j] = 0;
-				
 				cells[i][j] = new Cell();
 			}
 		}
-	}
-	
-	public int[][] getMap() {
-		return this.map;
 	}
 	
 	public Cell[][] getCells() {
@@ -70,15 +59,11 @@ public class World {
 	}
 	
 	public void refreshWorld() {
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
-				this.map[i][j] = 0;
-				this.obstMap[i][j] = 0;
-				if (this.display) {
-					cells[i][j].update(0);
-				}
-			}
-		}
+        for (Cell[] row : cells) {
+            for (Cell cell : row) {
+                cell.update(Cell.empty);
+            }
+        }
 		growPlants(this.numPlants, this.clumps);		
 	}
 	
@@ -110,7 +95,7 @@ public class World {
 			int y = sourcePos.y;
 
 			// Do a random walk from the selected source until an empty cell is found.
-			while (this.map[y][x] == 1) {
+			while (cells[y][x].getContents() == Cell.plant) {
 				int moveDir = (int)(Math.random()*4);
 				switch (moveDir) {
 				case 0:
@@ -131,10 +116,8 @@ public class World {
 				if (y < 0) y += this.rows;
 				if (y >= this.rows) y -= this.rows;
 			}
-			this.map[y][x] = 1;
-			if (this.display) {
-				cells[y][x].update(1);
-			}
+
+			cells[y][x].update(Cell.plant);
 		}
 	}
 	
@@ -149,8 +132,7 @@ public class World {
 		
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols; j++ ) {
-				this.obstMap[i][j] = this.map[i][j];
-				if (this.map[i][j] == 0) emptyCount++;
+				if (cells[i][j].getContents() == Cell.empty) emptyCount++;
 			}
 		}
 		
@@ -165,16 +147,14 @@ public class World {
 			do {
 				x = (int)(Math.random()*this.cols);
 				y = (int)(Math.random()*this.rows);
-			} while (this.obstMap[y][x] != 0);
+			} while (cells[y][x].getContents() != Cell.empty);
 		
 			evolvers.add(new Evolver(x, y, direction));
 			if (genomeList.size() > i) {
 				evolvers.get(i).setGenome(genomeList.get(i));
 			}
-			if (this.display) {
-				cells[y][x].addEvolver(direction);
-			}
-			this.obstMap[y][x] = 2;
+
+			cells[y][x].addEvolver(direction);
 		}
 	}
 	
@@ -188,27 +168,18 @@ public class World {
 	public void step() {
 		// Update "obstMap".  This contains the map information as well as
 		// evolver locations.
-		for (int i = 0; i < this.rows; i++) {
-			this.obstMap[i] = this.map[i].clone();
-		}
-		for (Evolver e : this.evolvers) {
-			int[] coords = e.getCoords();
-			this.obstMap[coords[1]][coords[0]] = 2;
-		}
 		for (Evolver e : this.evolvers) {
 			moveEvolver(e);
 		}
 	}
 
-	
 	private void moveEvolver(Evolver e) {
 		int direction = e.getDirection();
 		int[] coords = e.getCoords();
 		int[] facingCoords = normalize(addCoords(coords,this.directions.get(direction)));
 		
-		// The value of the cell the evolver is facing - 0 (empty), 1 (plant), or 2 (evolver)
-		// TODO: make these final ints instead of magic numbers.
-		int facingCell = this.obstMap[facingCoords[1]][facingCoords[0]];
+		// The value of the cell the evolver is facing
+		int facingCell = cells[facingCoords[1]][facingCoords[0]].getContents();
 		
 		// Get the action from the evolver.
 		int action = e.getAction(facingCell);
@@ -217,15 +188,11 @@ public class World {
 		switch (action) {
 		case 0:
 			// Move forward if the cell isn't blocked.
-			if (this.obstMap[facingCoords[1]][facingCoords[0]] < 2) {
+			if (!cells[facingCoords[1]][facingCoords[0]].isBlocked()) {
 				e.setCoords(facingCoords[0], facingCoords[1]);
 				consume(e, facingCoords);
-				this.obstMap[coords[1]][coords[0]] = this.map[coords[1]][coords[0]];
-				this.obstMap[facingCoords[1]][facingCoords[0]] = 2;
-				if (this.display) {
-					cells[coords[1]][coords[0]].removeEvolver();
-					cells[facingCoords[1]][facingCoords[0]].addEvolver(e.getDirection());
-				}
+				cells[coords[1]][coords[0]].removeEvolver();
+				cells[facingCoords[1]][facingCoords[0]].addEvolver(e.getDirection());
 			}
 			break;
 		case 1:
@@ -233,12 +200,14 @@ public class World {
 			newDirection = direction + 1;
 			if (newDirection >= 4) newDirection -= 4;
 			e.setDirection(newDirection);
+            cells[coords[1]][coords[0]].addEvolver(newDirection);
 			break;
 		case 2:
 			// Turn right.
 			newDirection = direction - 1;
 			if (newDirection < 0) newDirection += 4;
 			e.setDirection(newDirection);
+            cells[coords[1]][coords[0]].addEvolver(newDirection);
 			break;
 		case 3:
 			// Move backward if the cell isn't blocked.
@@ -247,30 +216,23 @@ public class World {
 			
 			int[] newCoords = normalize(addCoords(coords,this.directions.get(backDirection)));
 			
-			if (this.obstMap[newCoords[1]][newCoords[0]] < 2) {
+			if (!cells[newCoords[1]][newCoords[0]].isBlocked()) {
 				e.setCoords(newCoords[0],newCoords[1]);
 				consume(e, newCoords);
-				this.obstMap[coords[1]][coords[0]] = this.map[coords[1]][coords[0]];
-				this.obstMap[newCoords[1]][newCoords[0]] = 2;
-				if (this.display) {
-					cells[coords[1]][coords[0]].removeEvolver();
-					cells[newCoords[1]][newCoords[0]].addEvolver(e.getDirection());
-				}
+
+                cells[coords[1]][coords[0]].removeEvolver();
+				cells[newCoords[1]][newCoords[0]].addEvolver(e.getDirection());
 			}
 			break;
 		}
 	}
 	
 	public void consume(Evolver e, int[] coords) {
-		// Empty a cell an evolver moves onto.
-		if (map[coords[1]][coords[0]] == 1) {
+        // Empty a cell an evolver moves onto.
+		if (cells[coords[1]][coords[0]].getContents() == Cell.plant) {
 			e.eat();
-			if (this.display) {
-				cells[coords[1]][coords[0]].update(0);
-			}
+			cells[coords[1]][coords[0]].update(Cell.empty);
 		}
-		this.map[coords[1]][coords[0]] = 0;
-		this.obstMap[coords[1]][coords[0]] = 0;
 	}
 	
 	public int[] addCoords(int[] xs, int[] ys) {
@@ -294,7 +256,7 @@ public class World {
 		ArrayList<int[]> genomeList = new ArrayList<int[]>();
 		
 		for (int i = 0; i < evolvers.size(); i+=2) {
-			// Choose two (differet) random evolvers.
+			// Choose two (different) random evolvers.
 			Evolver e1 = randomChoice(evolvers);
 			Evolver e2 = e1;
 		
@@ -374,7 +336,7 @@ public class World {
 	public double averageScore() {
 		int sum = 0;
 		for (Evolver e : this.evolvers) {
-			sum += e.getScore()-1;
+			sum += e.getScore();
 		}
 		return (double)(sum)/this.evolvers.size();
 	}
@@ -382,17 +344,17 @@ public class World {
 	public int maxScore() {
 		int max = 0;
 		for (Evolver e : this.evolvers) {
-			int score = e.getScore()-1;
+			int score = e.getScore();
 			if (score > max) max = score;
 		}
 		return max;
 	}
 	
-	public void display() {
-		this.display = true;
-	}
-	
-	public void noDisplay() {
-		this.display = false;
+	public void display(Boolean val) {
+		for (Cell[] row : cells) {
+            for (Cell cell : row) {
+                cell.display(val);
+            }
+        }
 	}
 }

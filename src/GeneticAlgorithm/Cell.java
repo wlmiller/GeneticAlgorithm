@@ -9,12 +9,27 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Cell extends JPanel {
-	Color color = Color.black;
+    public static final int empty = 0;
+    public static final int plant = 1;
+    public static final int evolver = 1;
+
+	int contents;
+    Boolean visible = false;
 	// evolverDirection = -1 represents "no evolver."
 	int evolverDirection = -1;
 
 	public void paintComponent (Graphics g) {
-		g.setColor(color);
+        Color color = Color.black;
+
+        if (!this.visible) {
+            color = Color.black;
+        } else if (this.contents == empty) {
+            color = new Color(160, 82, 45);
+        } else if (this.contents == plant) {
+            color = Color.green;
+        }
+
+        g.setColor(color);
 		g.fillRect(0,0,getWidth(),getHeight());
 
 		if (evolverDirection >= 0) {
@@ -75,21 +90,30 @@ public class Cell extends JPanel {
 	}
 	
 	public void update(int contents) {
-		Color newColor = Color.black;
-
-        if (contents == -1) {
-			newColor = Color.black;
-		} else if (contents == 0) {
-			newColor = new Color(160, 82, 45);
-		} else if (contents == 1) {
-			newColor = Color.green;
-		}
-
-        if (newColor != this.color) {
-            this.color = newColor;
-            repaint();
+        if (contents != this.contents) {
+            this.contents = contents;
+            if (this.visible) repaint();
         }
 	}
+
+    public void display(Boolean val) {
+        if (this.visible != val) {
+            this.visible = val;
+            repaint();
+        }
+    }
+
+    public int getContents() {
+        if (this.evolverDirection != -1) {
+            return evolver;
+        } else {
+            return this.contents;
+        }
+    }
+
+    public Boolean isBlocked() {
+        return this.evolverDirection != -1;
+    }
 	
 	public void addEvolver(int direction) {
 		this.evolverDirection = direction;

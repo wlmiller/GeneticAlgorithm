@@ -66,7 +66,7 @@ public class Evolver {
 	}
 	
 	public int getScore() {
-		return this.score;
+		return this.score-1;
 	}
 	
 	public int[] getGenome() {
@@ -88,8 +88,8 @@ public class Evolver {
 	public void setGenome(int[] genomeArray) {
 		// Translate the genome from a 1D array.
 		for (int i = 0; i < genomeArray.length; i+=2) {
-			int state = (int)(i/(NUM_INPUTS*2));
-			int input = (int)((i - state*NUM_INPUTS*2)/(2));
+			int state = (i/(NUM_INPUTS*2));
+			int input = (i - state*NUM_INPUTS*2)/2;
 			genome[state][input].move = genomeArray[i];
 			genome[state][input].newState = genomeArray[i+1];
 		}
