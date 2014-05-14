@@ -59,11 +59,11 @@ public class World {
 	}
 	
 	public void refreshWorld() {
-        for (Cell[] row : cells) {
-            for (Cell cell : row) {
-                cell.update(Cell.empty);
-            }
-        }
+		for (Cell[] row : cells) {
+			for (Cell cell : row) {
+				cell.update(Cell.empty);
+			}
+		}
 		growPlants(this.numPlants, this.clumps);		
 	}
 	
@@ -200,14 +200,14 @@ public class World {
 			newDirection = direction + 1;
 			if (newDirection >= 4) newDirection -= 4;
 			e.setDirection(newDirection);
-            cells[coords[1]][coords[0]].addEvolver(newDirection);
+			cells[coords[1]][coords[0]].addEvolver(newDirection);
 			break;
 		case 2:
 			// Turn right.
 			newDirection = direction - 1;
 			if (newDirection < 0) newDirection += 4;
 			e.setDirection(newDirection);
-            cells[coords[1]][coords[0]].addEvolver(newDirection);
+			cells[coords[1]][coords[0]].addEvolver(newDirection);
 			break;
 		case 3:
 			// Move backward if the cell isn't blocked.
@@ -220,7 +220,7 @@ public class World {
 				e.setCoords(newCoords[0],newCoords[1]);
 				consume(e, newCoords);
 
-                cells[coords[1]][coords[0]].removeEvolver();
+				cells[coords[1]][coords[0]].removeEvolver();
 				cells[newCoords[1]][newCoords[0]].addEvolver(e.getDirection());
 			}
 			break;
@@ -228,7 +228,7 @@ public class World {
 	}
 	
 	public void consume(Evolver e, int[] coords) {
-        // Empty a cell an evolver moves onto.
+		// Empty a cell an evolver moves onto.
 		if (cells[coords[1]][coords[0]].getContents() == Cell.plant) {
 			e.eat();
 			cells[coords[1]][coords[0]].update(Cell.empty);
@@ -352,9 +352,9 @@ public class World {
 	
 	public void display(Boolean val) {
 		for (Cell[] row : cells) {
-            for (Cell cell : row) {
-                cell.display(val);
-            }
-        }
+			for (Cell cell : row) {
+				cell.display(val);
+			}
+		}
 	}
 }

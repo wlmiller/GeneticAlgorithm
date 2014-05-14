@@ -54,11 +54,11 @@ public class GeneticAlgorithm {
 		world.placeEvolvers(EVOLVER_COUNT);
 		
 		Cell[][] cells = world.getCells();
-        for (Cell[] row : cells) {
-            for (Cell cell : row) {
-                worldGrid.add(cell);
-            }
-        }
+		for (Cell[] row : cells) {
+			for (Cell cell : row) {
+				worldGrid.add(cell);
+			}
+		}
 
 		final TextScroll scroll = new TextScroll();
 		
@@ -70,7 +70,7 @@ public class GeneticAlgorithm {
 				if (!source.getValueIsAdjusting()) {
 					setTimeStep(1000/source.getValue());
 				}
-            }
+			}
 		});
 
 		Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
@@ -86,15 +86,15 @@ public class GeneticAlgorithm {
 		speedLabel.setVerticalAlignment(JLabel.TOP);
 		speedLabel.setFont(labelFont);
 
-        Checkbox yearEndOnly = new Checkbox("Show only year-end summaries", false);
-        yearEndOnly.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                Checkbox source = (Checkbox) e.getSource();
-                slider.setEnabled(!source.getState());
-                world.display(!source.getState());
-            }
-        });
+		Checkbox yearEndOnly = new Checkbox("Show only year-end summaries", false);
+		yearEndOnly.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				Checkbox source = (Checkbox) e.getSource();
+				slider.setEnabled(!source.getState());
+				world.display(!source.getState());
+			}
+		});
 		
 		JLabel scoresLabel = new JLabel("Scores:");
 		scoresLabel.setFont(labelFont);
@@ -109,11 +109,11 @@ public class GeneticAlgorithm {
 		frame.add(worldGrid,c);
 		c.gridheight = 1;
 
-        c.fill = GridBagConstraints.BOTH;
-        c.weightx = 1.0;
-        c.gridx = 1;
-        c.gridy = 0;
-        frame.add(speedLabel,c);
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1.0;
+		c.gridx = 1;
+		c.gridy = 0;
+		frame.add(speedLabel,c);
 
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1.0;
@@ -121,11 +121,11 @@ public class GeneticAlgorithm {
 		c.gridy = 0;
 		frame.add(slider,c);
 
-        c.fill = GridBagConstraints.BOTH;
-        c.weightx = 1.0;
-        c.gridx = 2;
-        c.gridy = 1;
-        frame.add(yearEndOnly,c);
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1.0;
+		c.gridx = 2;
+		c.gridy = 1;
+		frame.add(yearEndOnly,c);
 		
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1.0;
@@ -149,9 +149,9 @@ public class GeneticAlgorithm {
 		// Run the simulation for 200 "years".  The first 100 are not displayed,
 		// but the average and maximum score (number of plants per evolver) are
 		// shown for each year.
-        int i = 0;
+		int i = 0;
 		while (true) {
-            i++;
+			i++;
 			for (int j = 0; j < 365; j++) {
 				if (!yearEndOnly.getState()) {
 					try {
